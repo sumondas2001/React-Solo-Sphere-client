@@ -3,15 +3,23 @@ import { useContext, useEffect, useState } from "react"
 import { useParams } from "react-router";
 import { AuthContext } from "../provider/AuthProvider";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import toast from "react-hot-toast";
+
 const JobDetails = () => {
+  const [startDate, setStartDate] = useState(new Date());
+
   const { user } = useContext(AuthContext);
   const { id } = useParams();
   const [jobDetail, setJobDetail] = useState([]);
   // console.log(id);
   // console.log(import.meta.env.VITE_API_URL);
 
-  const { category, job_title, min_price, max_price, deadline, description, buyer_email, } = jobDetail || [];
 
+  const { job_title, deadline, category, min_price, max_price, description, buyer } = jobDetail || [];
+  // console.log(buyer.buyer_email);
+  // console.log(user.email);
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/job/${id}`)
@@ -23,6 +31,48 @@ const JobDetails = () => {
       })
   }, [id]);
 
+  const handelFromSubmission = (e) => {
+
+
+    e.preventDefault();
+    if (buyer?.buyer_email == user.email)
+      return toast.error('Action not permitted!')
+    const from = e.target;
+    const jobId = id;
+    const price = parseFloat(from.price.value);
+    if (price < parseInt(min_price)) {
+      return toast.error('Offer more or at least equal to Minimum Price')
+    }
+    const bitComment = from.comment.value;
+    const email = user?.email;
+
+    const dateline = startDate;
+
+    const status = 'padding';
+
+    const bidData = {
+      jobId,
+      price,
+      bitComment,
+      email,
+      buyer,
+      job_title,
+      dateline,
+      status
+    }
+    console.table(bidData);
+
+    axios.post(`${import.meta.env.VITE_API_URL}/bid`, bidData)
+      .then(res => {
+        console.log(res.data)
+        if (res.data.acknowledged === true) {
+          toast.success("Job Bid successfully")
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
 
 
   return (
@@ -31,7 +81,7 @@ const JobDetails = () => {
       <div className='flex-1  px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px]'>
         <div className='flex items-center justify-between'>
           <span className='text-sm font-light text-gray-800 '>
-            Deadline: {deadline}
+            Deadline: {new Date(deadline).toLocaleDateString()}
           </span>
           <span className='px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full '>
             {category}
@@ -51,13 +101,13 @@ const JobDetails = () => {
           </p>
           <div className='flex items-center gap-5'>
             <div>
-              <p className='mt-2 text-sm  text-gray-600 '>Name: </p>
+              <p className='mt-2 text-sm  text-gray-600 '>Name: {buyer?.name}</p>
               <p className='mt-2 text-sm  text-gray-600 '>
-                Email: {buyer_email}
+                Email: {buyer?.buyer_email}
               </p>
             </div>
             <div className='rounded-full object-cover overflow-hidden w-14 h-14'>
-              <img src='' alt='' />
+              <img src={buyer?.photo} alt='' />
             </div>
           </div>
           <p className='mt-6 text-lg font-bold text-gray-600 '>
@@ -71,7 +121,7 @@ const JobDetails = () => {
           Place A Bid
         </h2>
 
-        <form>
+        <form onSubmit={handelFromSubmission}>
           <div className='grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2'>
             <div>
               <label className='text-gray-700 ' htmlFor='price'>
@@ -114,6 +164,8 @@ const JobDetails = () => {
               <label className='text-gray-700'>Deadline</label>
 
               {/* Date Picker Input Field */}
+              <DatePicker className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md   focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40  focus:outline-none focus:ring'" selected={startDate} onChange={(date) => setStartDate(date)} />
+
             </div>
           </div>
 
