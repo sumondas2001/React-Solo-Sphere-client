@@ -58,7 +58,8 @@ const JobDetails = () => {
       buyer,
       job_title,
       dateline,
-      status
+      status,
+      category
     }
     console.table(bidData);
 

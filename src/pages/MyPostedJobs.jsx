@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../provider/AuthProvider"
 import axios from "axios";
+import toast from "react-hot-toast";
+import { Link } from "react-router";
 
 const MyPostedJobs = () => {
   const { user } = useContext(AuthContext);
@@ -11,22 +13,40 @@ const MyPostedJobs = () => {
 
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/my-posted-job/${user?.email}`)
+
+    getData()
+
+  }, [user?.email]);
+  const getData = async () => {
+    await axios.get(`${import.meta.env.VITE_API_URL}/my-posted-job/${user?.email}`)
       .then(res => {
         // console.log(res.data);
         setPosts(res.data)
       })
       .catch(error => {
         console.log(error);
+      });
+
+  }
+
+  const handelDELETE = (id) => {
+    axios.delete(`${import.meta.env.VITE_API_URL}/jobDelete/${id}`)
+      .then(res => {
+        console.log(res.data);
+        toast.success('Delete Successfully')
+        getData()
       })
-  }, [user?.email])
+      .catch(error => {
+        console.log(error)
+      })
+  }
   return (
     <section className='container px-4 mx-auto pt-12'>
       <div className='flex items-center gap-x-3'>
         <h2 className='text-lg font-medium text-gray-800 '>My Posted Jobs</h2>
 
         <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full '>
-          05 Jobs
+          {posts.length} Jobs
         </span>
       </div>
 
@@ -89,7 +109,7 @@ const MyPostedJobs = () => {
                       </td>
 
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                        {post.deadline}
+                        {new Date(post.deadline).toLocaleDateString()}
                       </td>
 
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
@@ -113,7 +133,7 @@ const MyPostedJobs = () => {
                       </td>
                       <td className='px-4 py-4 text-sm whitespace-nowrap'>
                         <div className='flex items-center gap-x-6'>
-                          <button className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
+                          <button onClick={() => handelDELETE(post._id)} className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
                             <svg
                               xmlns='http://www.w3.org/2000/svg'
                               fill='none'
@@ -130,7 +150,9 @@ const MyPostedJobs = () => {
                             </svg>
                           </button>
 
-                          <button className='text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
+                          <Link
+                            to={`/update/${post._id}`}
+                            className='text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
                             <svg
                               xmlns='http://www.w3.org/2000/svg'
                               fill='none'
@@ -145,7 +167,7 @@ const MyPostedJobs = () => {
                                 d='M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10'
                               />
                             </svg>
-                          </button>
+                          </Link>
                         </div>
                       </td>
                     </tr>))

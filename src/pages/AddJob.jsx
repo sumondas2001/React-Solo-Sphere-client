@@ -16,6 +16,7 @@ const AddJob = () => {
     const job_title = from.job_title.value;
 
     const deadline = startDate;
+
     const category = from.category.value;
     const min_price = parseFloat(from.min_price.value);
     const max_price = parseFloat(from.max_price.value);
