@@ -1,12 +1,12 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router"
-import { AuthContext } from "../provider/AuthProvider";
 import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
+import useAuth from "../hooks/useAuth";
 
 const UpdateJob = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate()
   const [jobDetail, setJobDetail] = useState([]);

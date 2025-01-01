@@ -1,9 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router";
 import bgImg from '../assets/images/login.jpg'
 import logo from '../assets/images/logo.png'
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../provider/AuthProvider";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
+import axios from "axios";
+import useAuth from "../hooks/useAuth";
 
 const Login = () => {
 
@@ -11,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   console.log(location);
-  const { signIn, signInWithGoogle, user, loading } = useContext(AuthContext);
+  const { signIn, signInWithGoogle, user, loading } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -22,7 +23,19 @@ const Login = () => {
 
   const handelGoogleLogin = async () => {
     try {
-      await signInWithGoogle()
+      const result = await signInWithGoogle()
+
+      axios.post(`${import.meta.env.VITE_API_URL}/jwt`, {
+        email: result?.user?.email
+      }, { withCredentials: true })
+
+        .then(res => {
+          console.log(res.data);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+
       toast.success('signIn Successfully');
       navigate(location.state ? location.state : '/');
     } catch (error) {
@@ -40,8 +53,18 @@ const Login = () => {
     const pass = from.password.value;
     console.log(email, pass)
     try {
-      const result = await signIn(email, pass)
-      console.log(result)
+      const result = await signIn(email, pass);
+      axios.post(`${import.meta.env.VITE_API_URL}/jwt`, {
+        email: result?.user?.email
+      }, { withCredentials: true })
+
+        .then(res => {
+          console.log(res.data);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+      // console.log(result)
       toast.success('login Successfully')
       navigate(location.state ? location.state : '/')
 

@@ -10,6 +10,7 @@ const TabCategories = () => {
           axios.get(`${import.meta.env.VITE_API_URL}/jobs`)
                .then(res => {
                     setJobs(res.data)
+                    console.log(res.data);
                })
                .catch(error => {
                     console.log(error)

@@ -1,14 +1,19 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../provider/AuthProvider";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import useAuth from "../hooks/useAuth";
 
 const MyBids = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [bids, setBids] = useState([]);
   // console.log(user?.email);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/my-bids-job/${user?.email}`)
+
+    myBids()
+  }, [user?.email]);
+
+  const myBids = () => {
+    axios.get(`${import.meta.env.VITE_API_URL}/my-bids-job/${user?.email}`, { withCredentials: true })
       .then(res => {
         console.log(res.data);
         setBids(res.data)
@@ -16,7 +21,19 @@ const MyBids = () => {
       .catch(error => {
         console.log(error);
       })
-  }, [user?.email])
+  }
+
+  const handelStatus = (id, status) => {
+
+    axios.patch(`${import.meta.env.VITE_API_URL}/bid-update/${id}`, { status },)
+      .then(res => {
+        console.log(res.data);
+        myBids()
+      })
+      .catch(error => {
+        console.log(error);
+      })
+  };
   return (
     <section className='container px-4 mx-auto pt-12'>
       <div className='flex items-center gap-x-3'>
@@ -125,8 +142,9 @@ const MyBids = () => {
                       </td>
                       <td className='px-4 py-4 text-sm whitespace-nowrap'>
                         <button
+                          disabled={bid.status === 'In Progress'}
                           title='Mark Complete'
-                          disabled={bid.status !== 'In Progress'}
+                          onClick={() => handelStatus(bid._id, 'Complete')}
                           className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed'
                         >
                           <svg

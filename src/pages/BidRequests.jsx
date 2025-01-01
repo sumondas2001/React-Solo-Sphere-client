@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "react"
-import { AuthContext } from "../provider/AuthProvider"
+import { useEffect, useState } from "react"
 import axios from "axios";
+import useAuth from "../hooks/useAuth";
 
 const BidRequests = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const [bidRequests, setBidRequests] = useState([])
 
@@ -16,7 +16,7 @@ const BidRequests = () => {
   const bidRequest = async () => {
 
 
-    axios.get(`${import.meta.env.VITE_API_URL}/bids-Requests/${user.email}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/bids-Requests/${user.email}`, { withCredentials: true })
       .then(res => {
         console.log(res.data);
         setBidRequests(res.data)
@@ -26,7 +26,9 @@ const BidRequests = () => {
       })
   }
 
-  const handelProgress = (id, status) => {
+  const handelStatus = (id, preStatus, status) => {
+    if (preStatus === status) return console.log('no call for data base');
+
     axios.patch(`${import.meta.env.VITE_API_URL}/bid-update/${id}`, { status })
       .then(res => {
         console.log(res.data);
@@ -37,16 +39,7 @@ const BidRequests = () => {
       })
   };
 
-  const handelRejects = (id, status) => {
-    axios.patch(`${import.meta.env.VITE_API_URL}/bid-update/${id}`, { status })
-      .then(res => {
-        console.log(res.data);
-        bidRequest()
-      })
-      .catch(error => {
-        console.log(error);
-      })
-  }
+
   return (
     <section className='container px-4 mx-auto pt-12'>
       <div className='flex items-center gap-x-3'>
@@ -152,7 +145,9 @@ const BidRequests = () => {
                       <td className='px-4 py-4 text-sm whitespace-nowrap'>
                         <div className='flex items-center gap-x-6'>
                           <button
-                            onClick={() => handelProgress(bid._id, 'in Progress')}
+                            disabled={bid.status === 'Complete'}
+
+                            onClick={() => handelStatus(bid._id, bid.status, 'in Progress')}
                             className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
                             <svg
                               xmlns='http://www.w3.org/2000/svg'
@@ -171,7 +166,9 @@ const BidRequests = () => {
                           </button>
 
                           <button
-                            onClick={() => handelRejects(bid._id, "Rejects")}
+                            disabled={bid.status === 'Complete'}
+
+                            onClick={() => handelStatus(bid._id, bid.status, "Rejects")}
                             className='text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
                             <svg
                               xmlns='http://www.w3.org/2000/svg'

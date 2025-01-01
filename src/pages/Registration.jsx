@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "react-router"
 import bgImg from '../assets/images/register.jpg'
 import logo from '../assets/images/logo.png'
-import { useContext } from "react"
-import { AuthContext } from "../provider/AuthProvider"
 import toast from "react-hot-toast"
+import axios from "axios"
+import useAuth from "../hooks/useAuth"
 
 const Registration = () => {
-  const { user, setUser, createUser, signInWithGoogle, updateUserProfile } = useContext(AuthContext);
+  const { setUser, createUser, signInWithGoogle, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   // google login
 
@@ -32,9 +32,23 @@ const Registration = () => {
     console.log(email, pass, name, photo)
     try {
       const result = await createUser(email, pass)
-      console.log(result)
+
       await updateUserProfile(name, photo)
-      setUser({ ...user, photoURl: photo, displayName: name })
+      setUser({ result, photoURl: photo, displayName: name });
+
+
+      axios.post(`${import.meta.env.VITE_API_URL}/jwt`, {
+        email: result?.user?.email
+      }, { withCredentials: true })
+
+        .the(res => {
+          console.log(res.data);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+
+
       navigate('/')
       toast.success('login Successfully')
 

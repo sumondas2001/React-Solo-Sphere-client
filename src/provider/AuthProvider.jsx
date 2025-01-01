@@ -12,6 +12,7 @@ import {
 } from 'firebase/auth'
 export const AuthContext = createContext(null)
 import { app } from '../firebase/firebase.confige.js'
+import axios from 'axios'
 
 const auth = getAuth(app)
 const googleProvider = new GoogleAuthProvider()
@@ -37,6 +38,14 @@ const AuthProvider = ({ children }) => {
 
      const logOut = async () => {
           setLoading(true)
+          axios.get(`${import.meta.env.VITE_API_URL}/logOut`, { withCredentials: true })
+               .then(res => {
+                    console.log(res.data);
+               })
+               .catch(error => {
+                    console.log(error);
+               })
+
           return signOut(auth)
      }
 
