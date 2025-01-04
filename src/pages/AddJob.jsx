@@ -6,10 +6,12 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const AddJob = () => {
   const [startDate, setStartDate] = useState(new Date());
   // const { user } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure()
   const { user } = useAuth();
   const navigate = useNavigate();
   const handelAddJob = (e) => {
@@ -42,7 +44,7 @@ const AddJob = () => {
     }
     console.table(addJob)
 
-    axios.post(`${import.meta.env.VITE_API_URL}/addJob`, addJob)
+    axiosSecure.post(`/addJob`, addJob)
       .then(res => {
         console.log(res.data)
         if (res.data.acknowledged === true) {

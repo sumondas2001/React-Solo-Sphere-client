@@ -60,13 +60,13 @@ const Login = () => {
 
         .then(res => {
           console.log(res.data);
+          navigate(location.state ? location.state : '/')
+          toast.success('login Successfully')
         })
         .catch(error => {
           console.log(error);
         })
       // console.log(result)
-      toast.success('login Successfully')
-      navigate(location.state ? location.state : '/')
 
     } catch (error) {
       console.log(error)

@@ -1,45 +1,69 @@
-import { useEffect, useState } from "react"
-import axios from "axios";
+
+import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const BidRequests = () => {
   const { user } = useAuth();
 
-  const [bidRequests, setBidRequests] = useState([])
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
 
+  // Query get data 
+  const { data: bidRequests = [], isLoading, } = useQuery({
+    queryFn: () => bidRequest(),
+    queryKey: ['bids', user?.email]
+  });
+  console.log(bidRequests);
+  console.log(isLoading);
 
-
-  useEffect(() => {
-
-    bidRequest()
-  }, [user.email]);
   const bidRequest = async () => {
 
 
-    axios.get(`${import.meta.env.VITE_API_URL}/bids-Requests/${user.email}`, { withCredentials: true })
+    const data = axiosSecure.get(`/bids-Requests/${user.email}`)
       .then(res => {
         console.log(res.data);
-        setBidRequests(res.data)
+        return res.data
       })
       .catch(error => {
         console.log(error);
       })
-  }
+    return data
+  };
+
+  const { mutate } = useMutation({
+    mutationFn: ({ id, status }) => {
+      const data = axiosSecure.patch(`/bid-update/${id}`, { status })
+        .then(res => {
+          console.log(res.data);
+          return res.data;
+        })
+        .catch(error => {
+          console.log(error);
+        })
+      return data
+    },
+    onSuccess: () => {
+      console.log('wow data update');
+      toast.success('data update');
+
+      // data refetch
+      // // refetch()
+
+      queryClient.invalidateQueries({ queryKey: ['bids'] })
+    }
+  })
 
   const handelStatus = (id, preStatus, status) => {
     if (preStatus === status) return console.log('no call for data base');
 
-    axios.patch(`${import.meta.env.VITE_API_URL}/bid-update/${id}`, { status })
-      .then(res => {
-        console.log(res.data);
-        bidRequest()
-      })
-      .catch(error => {
-        console.log(error);
-      })
+
+
+    mutate({ id, status })
   };
 
-
+  if (isLoading) return <p>Data Loading.....</p>
   return (
     <section className='container px-4 mx-auto pt-12'>
       <div className='flex items-center gap-x-3'>

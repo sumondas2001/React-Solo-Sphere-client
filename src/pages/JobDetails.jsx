@@ -23,12 +23,14 @@ const JobDetails = () => {
   // console.log(user.email);
 
   useEffect(() => {
-    axiosSecure.get(`${import.meta.env.VITE_API_URL}/job/${id}`)
+    axiosSecure.get(`/job/${id}`)
       .then(res => {
         setJobDetail(res.data)
       })
       .catch(error => {
-        console.log(error)
+        // console.log(error.response);
+
+
       })
   }, [id]);
 
@@ -64,7 +66,7 @@ const JobDetails = () => {
     }
     console.table(bidData);
 
-    axiosSecure.post(`${import.meta.env.VITE_API_URL}/bid`, bidData)
+    axiosSecure.post(`/bid`, bidData)
       .then(res => {
         console.log(res.data)
         if (res.data.acknowledged === true) {
@@ -73,6 +75,8 @@ const JobDetails = () => {
       })
       .catch(error => {
         console.log(error)
+        toast.success(error.response.data);
+        from.reset()
       })
   }
 

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import useAuth from "../hooks/useAuth";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const MyBids = () => {
+  const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
   const [bids, setBids] = useState([]);
   // console.log(user?.email);
@@ -13,7 +14,7 @@ const MyBids = () => {
   }, [user?.email]);
 
   const myBids = () => {
-    axios.get(`${import.meta.env.VITE_API_URL}/my-bids-job/${user?.email}`, { withCredentials: true })
+    axiosSecure.get(`/my-bids-job/${user?.email}`)
       .then(res => {
         console.log(res.data);
         setBids(res.data)
@@ -25,7 +26,7 @@ const MyBids = () => {
 
   const handelStatus = (id, status) => {
 
-    axios.patch(`${import.meta.env.VITE_API_URL}/bid-update/${id}`, { status },)
+    axiosSecure.patch(`/bid-update/${id}`, { status },)
       .then(res => {
         console.log(res.data);
         myBids()
