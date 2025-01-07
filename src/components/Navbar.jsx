@@ -15,9 +15,13 @@ const Navbar = () => {
                </div>
                <div className='flex-none'>
                     <ul className='menu menu-horizontal px-1'>
-                         <li>
+                         <li className='flex gap-4'>
 
                               <Link to={'/'} className='font-medium'>Home</Link>
+
+                         </li>
+                         <li>
+                              <Link to={'/allJobs'} className='font-medium'>All Jobs</Link>
                          </li>
                          {
                               !user && (<li>

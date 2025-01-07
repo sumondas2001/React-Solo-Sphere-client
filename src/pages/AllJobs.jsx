@@ -1,7 +1,39 @@
-import JobCard from '../components/JobCard'
+import { useEffect, useState } from "react";
+import JobCard from "../components/JobCard";
+import axios from "axios";
 
 const AllJobs = () => {
-  const pages = [1, 2, 3, 4, 5]
+  const [itemPerPages, setItemPerPages] = useState(3);
+  const [currentPages, setCurrentPages] = useState(1)
+  const [count, setCount] = useState(0);
+
+  const [jobs, setJobs] = useState([]);
+  // console.log(count);
+
+  useEffect(() => {
+    const getData = async () => {
+
+      const { data } = await axios(`${import.meta.env.VITE_API_URL}/all-jobs?pages=${currentPages}&size=${itemPerPages}`)
+      setJobs(data)
+    }
+    getData()
+  }, [currentPages, itemPerPages])
+  useEffect(() => {
+    const getCount = async () => {
+
+      const { data } = await axios(`${import.meta.env.VITE_API_URL}/jobs-count`)
+      setCount(data.count)
+    }
+    getCount()
+  }, [])
+  // console.log(count);
+
+  const handelPaginationButton = (value) => {
+    setCurrentPages(value)
+  }
+
+  const numberOfPages = Math.ceil(count / itemPerPages)
+  const pages = [...Array(numberOfPages).keys()].map(element => element + 1)
   return (
     <div className='container px-6 py-10 mx-auto min-h-[calc(100vh-306px)] flex flex-col justify-between'>
       <div>
@@ -48,14 +80,19 @@ const AllJobs = () => {
           <button className='btn'>Reset</button>
         </div>
         <div className='grid grid-cols-1 gap-8 mt-8 xl:mt-16 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-          {/* {jobs.map(job => (
-            <JobCard key={job._id} job={job} />
-          ))} */}
+          {
+            jobs.map(job => (
+              <JobCard key={job._id} job={job} />
+            ))
+          }
         </div>
       </div>
 
       <div className='flex justify-center mt-12'>
-        <button className='px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white'>
+        <button
+          disabled={currentPages === 1}
+          onClick={() => handelPaginationButton(currentPages - 1)}
+          className='px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white'>
           <div className='flex items-center -mx-1'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -78,14 +115,18 @@ const AllJobs = () => {
 
         {pages.map(btnNum => (
           <button
+            onClick={() => handelPaginationButton(btnNum)}
             key={btnNum}
-            className={`hidden px-4 py-2 mx-1 transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-500  hover:text-white`}
+            className={`hidden px-4 py-2 mx-1 ${currentPages === btnNum ? 'bg-blue-500 text-white' : ''} transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-500  hover:text-white`}
           >
             {btnNum}
           </button>
         ))}
 
-        <button className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'>
+        <button
+          disabled={currentPages === numberOfPages}
+          onClick={() => handelPaginationButton(currentPages + 1)}
+          className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'>
           <div className='flex items-center -mx-1'>
             <span className='mx-1'>Next</span>
 
