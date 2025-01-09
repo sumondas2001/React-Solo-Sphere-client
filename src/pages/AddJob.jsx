@@ -40,7 +40,8 @@ const AddJob = () => {
 
         name: user?.displayName,
         photo: user?.photoURL,
-      }
+      },
+      bid_count: 0,
     }
     console.table(addJob)
 
